@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
@@ -35,19 +36,7 @@ namespace CleanUpAtStartup
         //  }
 
         //}
-
-        //foreach (string directory in Directory.GetDirectories(temporaryDirectory))
-        //{
-        //  //DirectoryInfo drinfo = new DirectoryInfo(directory);
-        //  try
-        //  {
-        //    Directory.Delete(directory);
-        //  }
-        //  catch (Exception)
-        //  {
-        //  }
-        //}
-
+        
         string pattern = "*.*";
         temporaryDirectory = "c:\\temp";
         DeleteFiles(temporaryDirectory, pattern);
@@ -57,10 +46,41 @@ namespace CleanUpAtStartup
         temporaryDirectory = "C:\\";
         DeleteFiles(temporaryDirectory, pattern);
 
+        // Deleting sub-directories in c:\temp
+        pattern = "*.*";
+        temporaryDirectory = "c:\\temp";
+        DeleteDirectories(temporaryDirectory);
+
         Console.ForegroundColor = ConsoleColor.Blue;
         display("Press any key to exit:");
         Console.ReadKey();
       }
+    }
+
+    private static void DeleteDirectories(string temporaryDirectory)
+    {
+      int numberOfDirectoryDeleted = 0;
+      int numberOfDirectoryNotDeleted = 0;
+      Action<string> display = Console.WriteLine;
+      foreach (string directory in Directory.GetDirectories(temporaryDirectory))
+      {
+        try
+        {
+          Directory.Delete(directory);
+          numberOfDirectoryDeleted++;
+        }
+        catch (Exception)
+        {
+          numberOfDirectoryNotDeleted++;
+        }
+      }
+
+      Console.ForegroundColor = ConsoleColor.White;
+      display("Directory deletion");
+      Console.ForegroundColor = ConsoleColor.Green;
+      display($"Directories deleted: {numberOfDirectoryDeleted}");
+      Console.ForegroundColor = ConsoleColor.Red;
+      display($"Directories not deleted: {numberOfDirectoryNotDeleted}");
     }
 
     private static void DeleteFiles(string temporaryDirectory, string pattern)
@@ -88,7 +108,9 @@ namespace CleanUpAtStartup
 
       Console.ForegroundColor = ConsoleColor.White;
       display($"pattern to delete: {pattern}");
+      Console.ForegroundColor = ConsoleColor.Green;
       display($"{numberOfFileDeleted} files have been deleted");
+      Console.ForegroundColor = ConsoleColor.Red;
       display($"{numberOfFileNotDeleted} files have not been deleted");
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,50 +19,77 @@ namespace CleanUpAtStartup
       }
 
       // for each sub-directories, try to delete every files
-      try
+      //try
+      //{
+      if (Directory.Exists(temporaryDirectory))
       {
-        if (Directory.Exists(temporaryDirectory))
-        {
-          foreach (var fi in di.ProgDir.EnumerateFiles("*.*", SearchOption.AllDirectories))
-          {
-            try
-            {
-              files.Add(fi);
-            }
-            catch (UnauthorizedAccessException)
-            {
-              // ignore
-            }
-          }
-          foreach (string file in Directory.GetFiles(temporaryDirectory))
-          {
-            //FileInfo flinfo = new FileInfo(file);
-            try
-            {
-              File.Delete(file);
-            }
-            catch (Exception)
-            {
-            }
-          }
+        //foreach (var fi in di.ProgDir.EnumerateFiles("*.*", SearchOption.AllDirectories))
+        //{
+        //  try
+        //  {
+        //    files.Add(fi);
+        //  }
+        //  catch (UnauthorizedAccessException)
+        //  {
+        //    // ignore
+        //  }
+        //}
+        //foreach (string file in Directory.GetFiles(temporaryDirectory))
+        //{
+        //  //FileInfo flinfo = new FileInfo(file);
+        //  try
+        //  {
+        //    File.Delete(file);
+        //  }
+        //  catch (Exception)
+        //  {
+        //  }
 
-          foreach (string directory in Directory.GetDirectories(temporaryDirectory))
+        //}
+
+        //foreach (string directory in Directory.GetDirectories(temporaryDirectory))
+        //{
+        //  //DirectoryInfo drinfo = new DirectoryInfo(directory);
+        //  try
+        //  {
+        //    Directory.Delete(directory);
+        //  }
+        //  catch (Exception)
+        //  {
+        //  }
+        //}
+        int numberOfFileDeleted = 0;
+        int numberOfFileNotDeleted = 0;
+        foreach (var file in GetFiles(temporaryDirectory))
+        {
+          try
           {
-            //DirectoryInfo drinfo = new DirectoryInfo(directory);
-            try
-            {
-              Directory.Delete(directory);
-            }
-            catch (Exception)
-            {
-            }
+            File.Delete(file);
+            numberOfFileDeleted++;
+            Console.ForegroundColor = ConsoleColor.Green;
+            display($"File deleted: {file}");
+          }
+          catch (Exception)
+          {
+            // do nothing, just go on to the next file
+            Console.ForegroundColor = ConsoleColor.Red;
+            display($"File cannot be deleted: {file}");
+            numberOfFileNotDeleted++;
           }
         }
+
+        Console.ForegroundColor = ConsoleColor.White;
+        display($"{numberOfFileDeleted} files have been deleted");
+        display($"{numberOfFileNotDeleted} files have not been deleted");
+        Console.ForegroundColor = ConsoleColor.Blue;
+        display("Press any key to exit:");
+        Console.ReadKey();
       }
-      catch (Exception)
-      {
-        // skip file and try next one
-      }
+      //}
+      //catch (Exception)
+      //{
+      //  // skip file and try next one
+      //}
     }
 
     public static List<FileInfo> SearchFiles(List<string> patternsList)
@@ -70,10 +98,10 @@ namespace CleanUpAtStartup
       foreach (DriveInfo drive in DriveInfo.GetDrives().Where(drive => drive.DriveType != DriveType.CDRom).Where(drive => drive.DriveType != DriveType.Network).Where(drive => drive.DriveType != DriveType.Removable))
       {
         var dirs = from dir in drive.RootDirectory.EnumerateDirectories()
-          select new
-          {
-            ProgDir = dir,
-          };
+                   select new
+                   {
+                     ProgDir = dir,
+                   };
 
         foreach (var di in dirs)
         {
@@ -104,14 +132,13 @@ namespace CleanUpAtStartup
       return files;
     }
 
-    public List<object> GetFiles(string initialDirectory)
+    public static List<object> GetFilesAsObject(string initialDirectory)
     {
       DirectoryInfo DIRINF = new DirectoryInfo(initialDirectory);
       List<FileInfo> FINFO = DIRINF.GetFiles("*.*").ToList();
       List<object> Data = new List<object>();
       foreach (FileInfo FoundFile in FINFO)
       {
-        // do somthing neat here.
         var Name = FoundFile.Name; // Gets the name, MasterPlan.docx
         var Path = FoundFile.FullName; // Gets the full path C:\STAIRWAYTOHEAVE\GODSBACKUPPLANS\MasterPlan.docx
         var Extension = FoundFile.Extension; // Gets the extension .docx
@@ -123,6 +150,28 @@ namespace CleanUpAtStartup
       }
 
       return Data;
+    }
+
+    public static List<string> GetFiles(string initialDirectory)
+    {
+      DirectoryInfo DirectoryInfo = new DirectoryInfo(initialDirectory);
+      List<FileInfo> listOfFileInfo = DirectoryInfo.GetFiles("*.*", SearchOption.TopDirectoryOnly).ToList();
+      try
+      {
+        listOfFileInfo = DirectoryInfo.GetFiles("*.*", SearchOption.AllDirectories).ToList();
+      }
+      catch (Exception)
+      {
+      }
+
+      List<string> listOfFiles = new List<string>();
+      foreach (FileInfo FoundFile in listOfFileInfo)
+      {
+        string Item = $"{FoundFile.FullName}{FoundFile.Name}";
+        listOfFiles.Add(Item);
+      }
+
+      return listOfFiles;
     }
   }
 }

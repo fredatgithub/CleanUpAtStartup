@@ -23,17 +23,6 @@ namespace CleanUpAtStartup
       //{
       if (Directory.Exists(temporaryDirectory))
       {
-        //foreach (var fi in di.ProgDir.EnumerateFiles("*.*", SearchOption.AllDirectories))
-        //{
-        //  try
-        //  {
-        //    files.Add(fi);
-        //  }
-        //  catch (UnauthorizedAccessException)
-        //  {
-        //    // ignore
-        //  }
-        //}
         //foreach (string file in Directory.GetFiles(temporaryDirectory))
         //{
         //  //FileInfo flinfo = new FileInfo(file);
@@ -58,38 +47,49 @@ namespace CleanUpAtStartup
         //  {
         //  }
         //}
-        int numberOfFileDeleted = 0;
-        int numberOfFileNotDeleted = 0;
-        foreach (var file in GetFiles(temporaryDirectory))
-        {
-          try
-          {
-            File.Delete(file);
-            numberOfFileDeleted++;
-            Console.ForegroundColor = ConsoleColor.Green;
-            display($"File deleted: {file}");
-          }
-          catch (Exception)
-          {
-            // do nothing, just go on to the next file
-            Console.ForegroundColor = ConsoleColor.Red;
-            display($"File cannot be deleted: {file}");
-            numberOfFileNotDeleted++;
-          }
-        }
 
-        Console.ForegroundColor = ConsoleColor.White;
-        display($"{numberOfFileDeleted} files have been deleted");
-        display($"{numberOfFileNotDeleted} files have not been deleted");
+        string pattern = "*.*";
+        temporaryDirectory = "c:\\temp";
+        DeleteFiles(temporaryDirectory, pattern);
+
+        // Deleting thumbs.db
+        pattern = "thumbs.db";
+        temporaryDirectory = "C:\\";
+        DeleteFiles(temporaryDirectory, pattern);
+
         Console.ForegroundColor = ConsoleColor.Blue;
         display("Press any key to exit:");
         Console.ReadKey();
       }
-      //}
-      //catch (Exception)
-      //{
-      //  // skip file and try next one
-      //}
+    }
+
+    private static void DeleteFiles(string temporaryDirectory, string pattern)
+    {
+      Action<string> display = Console.WriteLine;
+      int numberOfFileDeleted = 0;
+      int numberOfFileNotDeleted = 0;
+      foreach (var file in GetFiles(temporaryDirectory, pattern))
+      {
+        try
+        {
+          File.Delete(file);
+          numberOfFileDeleted++;
+          Console.ForegroundColor = ConsoleColor.Green;
+          display($"File deleted: {file}");
+        }
+        catch (Exception)
+        {
+          // do nothing, just go on to the next file
+          Console.ForegroundColor = ConsoleColor.Red;
+          display($"File cannot be deleted: {file}");
+          numberOfFileNotDeleted++;
+        }
+      }
+
+      Console.ForegroundColor = ConsoleColor.White;
+      display($"pattern to delete: {pattern}");
+      display($"{numberOfFileDeleted} files have been deleted");
+      display($"{numberOfFileNotDeleted} files have not been deleted");
     }
 
     public static List<FileInfo> SearchFiles(List<string> patternsList)
@@ -152,13 +152,13 @@ namespace CleanUpAtStartup
       return Data;
     }
 
-    public static List<string> GetFiles(string initialDirectory)
+    public static List<string> GetFiles(string initialDirectory, string pattern = "*.*")
     {
       DirectoryInfo DirectoryInfo = new DirectoryInfo(initialDirectory);
-      List<FileInfo> listOfFileInfo = DirectoryInfo.GetFiles("*.*", SearchOption.TopDirectoryOnly).ToList();
+      List<FileInfo> listOfFileInfo = DirectoryInfo.GetFiles(pattern, SearchOption.TopDirectoryOnly).ToList();
       try
       {
-        listOfFileInfo = DirectoryInfo.GetFiles("*.*", SearchOption.AllDirectories).ToList();
+        listOfFileInfo = DirectoryInfo.GetFiles(pattern, SearchOption.AllDirectories).ToList();
       }
       catch (Exception)
       {

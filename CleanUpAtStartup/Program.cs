@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 
@@ -50,6 +48,9 @@ namespace CleanUpAtStartup
         pattern = "*.*";
         temporaryDirectory = "c:\\temp";
         DeleteDirectories(temporaryDirectory);
+
+        // Delete MRU in registry
+        // TODO add code
 
         Console.ForegroundColor = ConsoleColor.Blue;
         display("Press any key to exit:");

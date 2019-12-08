@@ -42,9 +42,9 @@ namespace CleanUpAtStartup
         }
       }
 
-      display($"there have been {numberOfFileDeleted} files deleted");
+      display($"There have been {numberOfFileDeleted} files deleted");
       display(string.Empty);
-      display($"there have been {numberOfFileNotDeleted} files not deleted");
+      display($"There have been {numberOfFileNotDeleted} files not deleted");
       display(string.Empty);
 
       int numberOfDirectoriesDeleted = 0;
@@ -92,7 +92,7 @@ namespace CleanUpAtStartup
         // Delete MRU in registry
         // TODO add code
 
-        Console.ForegroundColor = ConsoleColor.Blue;
+        Console.ForegroundColor = ConsoleColor.White;
         display("Press any key to exit:");
         //Console.ReadKey();
       }

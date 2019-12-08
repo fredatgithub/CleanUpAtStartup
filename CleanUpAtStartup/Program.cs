@@ -16,6 +16,31 @@ namespace CleanUpAtStartup
       {
         return;
       }
+      int numberOfFileDeleted = 0;
+      List<string> listOfFileDeleted = new List<string>();
+      int numberOfFileNotDeleted = 0;
+      List<string> listOfFileNotDeleted = new List<string>();
+
+      foreach (var file in GetAllLargeFilesWithLinq(temporaryDirectory))
+      {
+        try
+        {
+          File.Delete(file.FullName);
+          numberOfFileDeleted++;
+          listOfFileDeleted.Add(file.FullName);
+        }
+        catch (Exception)
+        {
+          // do nothing and continue
+          numberOfFileNotDeleted++;
+          listOfFileNotDeleted.Add(file.FullName);
+        }
+      }
+
+      display($"there have been {numberOfFileDeleted} files deleted");
+      display(string.Empty);
+      display($"there have been {numberOfFileNotDeleted} files not deleted");
+      display(string.Empty);
 
       // for each sub-directories, try to delete every files
       //try
@@ -54,7 +79,7 @@ namespace CleanUpAtStartup
 
         Console.ForegroundColor = ConsoleColor.Blue;
         display("Press any key to exit:");
-        Console.ReadKey();
+        //Console.ReadKey();
       }
     }
 
@@ -195,6 +220,13 @@ namespace CleanUpAtStartup
       }
 
       return listOfFiles;
+    }
+
+    public static IEnumerable<FileInfo> GetAllLargeFilesWithLinq(string path)
+    {
+      var query = new DirectoryInfo(path).GetFiles()
+                      .OrderByDescending(file => file.Length);
+      return query;
     }
   }
 }

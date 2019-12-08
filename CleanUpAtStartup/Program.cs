@@ -43,23 +43,8 @@ namespace CleanUpAtStartup
       display(string.Empty);
 
       // for each sub-directories, try to delete every files
-      //try
-      //{
       if (Directory.Exists(temporaryDirectory))
       {
-        //foreach (string file in Directory.GetFiles(temporaryDirectory))
-        //{
-        //  //FileInfo flinfo = new FileInfo(file);
-        //  try
-        //  {
-        //    File.Delete(file);
-        //  }
-        //  catch (Exception)
-        //  {
-        //  }
-
-        //}
-        
         string pattern = "*.*";
         temporaryDirectory = "c:\\temp";
         DeleteFiles(temporaryDirectory, pattern);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Principal;
 
 namespace CleanUpAtStartup
 {
@@ -16,6 +17,10 @@ namespace CleanUpAtStartup
       {
         return;
       }
+
+      RecursiveDelete(new DirectoryInfo(temporaryDirectory));
+
+      Console.WriteLine($"Mode admin local {IsAdmin()}");
       int numberOfFileDeleted = 0;
       List<string> listOfFileDeleted = new List<string>();
       int numberOfFileNotDeleted = 0;
@@ -40,6 +45,31 @@ namespace CleanUpAtStartup
       display($"there have been {numberOfFileDeleted} files deleted");
       display(string.Empty);
       display($"there have been {numberOfFileNotDeleted} files not deleted");
+      display(string.Empty);
+
+      int numberOfDirectoriesDeleted = 0;
+      List<string> listOfDirectoriesDeleted = new List<string>();
+      int numberOfDirectoriesNotDeleted = 0;
+      List<string> listOfDirectoriesNotDeleted = new List<string>();
+      foreach (var dir in GetAllDirectoriesWithLinq(temporaryDirectory))
+      {
+        try
+        {
+          Directory.Delete(dir.FullName, true);
+          numberOfDirectoriesDeleted++;
+          listOfDirectoriesDeleted.Add(dir.FullName);
+        }
+        catch (Exception exception)
+        {
+          // do nothing and continue
+          numberOfDirectoriesNotDeleted++;
+          listOfDirectoriesNotDeleted.Add($"{dir.FullName} error: {exception.Message}");
+        }
+      }
+
+      display($"there have been {numberOfDirectoriesDeleted} directories deleted");
+      display(string.Empty);
+      display($"there have been {numberOfDirectoriesNotDeleted} directories not deleted");
       display(string.Empty);
 
       // for each sub-directories, try to delete every files
@@ -212,6 +242,50 @@ namespace CleanUpAtStartup
       var query = new DirectoryInfo(path).GetFiles()
                       .OrderByDescending(file => file.Length);
       return query;
+    }
+
+    public static IEnumerable<DirectoryInfo> GetAllDirectoriesWithLinq(string path)
+    {
+      return new DirectoryInfo(path).GetDirectories();
+    }
+
+    public static bool IsAdmin()
+    {
+      return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+    }
+
+    public static void RecursiveDelete(DirectoryInfo baseDir)
+    {
+      if (!baseDir.Exists)
+      {
+        return;
+      }
+
+      foreach (var dir in baseDir.EnumerateDirectories())
+      {
+        RecursiveDelete(dir);
+      }
+
+      var files = baseDir.GetFiles();
+      foreach (var file in files)
+      {
+        try
+        {
+          file.IsReadOnly = false;
+          file.Delete();
+        }
+        catch (Exception)
+        {
+        }
+      }
+
+      try
+      {
+        baseDir.Delete();
+      }
+      catch (Exception)
+      {
+      }
     }
   }
 }

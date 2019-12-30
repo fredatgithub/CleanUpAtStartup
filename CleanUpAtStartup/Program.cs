@@ -11,7 +11,7 @@ namespace CleanUpAtStartup
     private static void Main()
     {
       Action<string> display = Console.WriteLine;
-      string temporaryDirectory = "c:\\temp";
+      string temporaryDirectory = "c:\\temp\\";
 
       if (!Directory.Exists(temporaryDirectory))
       {
